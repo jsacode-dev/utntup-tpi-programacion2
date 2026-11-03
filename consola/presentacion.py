@@ -2,6 +2,7 @@ from rich.console import Console
 from rich.markup import escape
 from rich.panel import Panel
 from rich.table import Table
+from getpass import getpass
 
 CONSOLA = Console()
 
@@ -34,3 +35,12 @@ def mostrar_exito(mensaje: str) -> None:
 
 def mostrar_info(mensaje: str) -> None:
     CONSOLA.print(f"[bold yellow]Aviso:[/] {escape(mensaje)}")
+
+def mostrar_sistema(mensaje: str) -> None:
+    CONSOLA.print(f"[bold blue]Sistema:[/] {escape(mensaje)}")
+
+def limpiar_consola() -> None:
+    CONSOLA.clear()
+
+def esperar_enter(mensaje: str) -> None:
+    getpass(mensaje)
