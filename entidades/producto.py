@@ -11,7 +11,7 @@ class Producto(Base):
         self.stock = stock
         self.imagen = imagen
         self.disponible = disponible
-        self.categoria = categoria
+        self.__categoria = categoria
         categoria.agregar_producto(self)
 
     @property
@@ -54,6 +54,8 @@ class Producto(Base):
     def stock(self, valor: int) -> None:
         if not isinstance(valor, int) or isinstance(valor, bool):
             raise DatoInvalidoError("El stock debe ser un número entero.")
+        elif valor < 0:
+            raise DatoInvalidoError("El stock no puede ser negativo.")
         self.__stock = valor
 
     @property
