@@ -7,7 +7,7 @@ from excepciones.food_store_error import (
 
 class CategoriaServicio:
     def __init__(self) -> None:
-        self.categorias: list[Categoria] = []
+        self.__categorias: list[Categoria] = []
 
     def listar(self) -> list[Categoria]: #devuelve solo las categorías que no están eliminadas
         return [c for c in self.__categorias if not c.eliminado]

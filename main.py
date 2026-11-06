@@ -28,8 +28,9 @@ def login(servicio: UsuarioServicio) -> Usuario | None:
         contrasenia = getpass("Ingrese su contraseña: ")
         try:
             usuario = servicio.autenticar(email, contrasenia)
+            mostrar_exito(f"Bienvenido/a {usuario.nombre} {usuario.apellido} ({usuario.rol.value}).")
+            sleep(1)
             limpiar_consola()
-            mostrar_exito(f"Bienvenido/a {usuario.nombre} {usuario.apellido} ({usuario.rol.name}).")
             return usuario
         except CredencialesInvalidasError as e:
             intentos -= 1
