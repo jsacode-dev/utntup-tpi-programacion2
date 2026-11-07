@@ -40,6 +40,8 @@ class Usuario(Base):
     def mail(self, valor: str) -> None:
         if not valor.strip():
             raise DatoInvalidoError("El mail no puede estar vacío.")
+        if "@" not in valor or "." not in valor:
+            raise DatoInvalidoError("El mail debe tener formato válido (contener '@' y '.').")
         self.__mail = valor.strip()
 
     @property

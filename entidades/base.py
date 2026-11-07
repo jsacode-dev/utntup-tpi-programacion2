@@ -5,8 +5,8 @@ class Base(ABC):
     _contador: int = 0 #atributo de clase, para que no hayan dos objetos con el mismo id
 
     def __init__(self) -> None:
-        Base._contador += 1
         self.__id: int = Base._contador #se leerían con las properties
+        Base._contador += 1
         self.__eliminado: bool = False
         self.__creado_en: datetime = datetime.now()
 

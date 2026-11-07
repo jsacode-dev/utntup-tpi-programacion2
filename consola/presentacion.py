@@ -2,12 +2,12 @@ from rich.console import Console
 from rich.markup import escape
 from rich.panel import Panel
 from rich.table import Table
-from getpass import getpass
+from rich.text import Text
 
 CONSOLA = Console()
 
 def crear_tabla(titulo: str, columnas: list[str], filas: list[list[object]], color_encabezado: str = "bold cyan") -> Table:
-    tabla = Table(title=titulo, header_style=color_encabezado)
+    tabla = Table(title=titulo, title_style="italic", header_style=color_encabezado)
     for columna in columnas:
         tabla.add_column(columna)
     for fila in filas:
@@ -20,12 +20,15 @@ def mostrar_tabla(titulo: str, columnas: list[str], filas: list[list[object]]) -
         return
     CONSOLA.print(crear_tabla(titulo, columnas, filas))
 
+def mostrar_titulo(texto: str) -> None:
+    CONSOLA.print(Text(f"\n{texto}\n", style="bold yellow italic"))
+
 def mostrar_menu(titulo: str, opciones: list[tuple[int, str]]) -> None:
     filas = [[numero, texto] for numero, texto in opciones]
     CONSOLA.print(crear_tabla(titulo, ["Opción", "Descripción"], filas, color_encabezado="bold magenta"))
 
 def mostrar_encabezado(texto: str, subtexto: str = "") -> None:
-    CONSOLA.print(Panel(escape(texto), subtitle=escape(subtexto), style="bold magenta"))
+    CONSOLA.print(Panel(escape(texto), subtitle=Text(subtexto, style="italic"), style="bold magenta"))
 
 def mostrar_error(mensaje: str) -> None:
     CONSOLA.print(f"[bold red]Error:[/] {escape(mensaje)}")
@@ -41,6 +44,3 @@ def mostrar_sistema(mensaje: str) -> None:
 
 def limpiar_consola() -> None:
     CONSOLA.clear()
-
-def esperar_enter(mensaje: str) -> None:
-    getpass(mensaje)

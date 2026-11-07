@@ -4,7 +4,9 @@ import re
 from consola.presentacion import mostrar_error
 from excepciones.food_store_error import DatoInvalidoError
 
-PATRON_EMAIL = re.compile(r"[\w.-]+@[\w.-]+\.\w+")
+def es_email_valido(valor: str) -> bool:
+    patron_email = re.compile(r"[\w.-]+@[\w.-]+\.\w+")
+    return patron_email.fullmatch(valor.strip()) is not None
 
 def validar_texto(m_entrada: str, m_salida: str | None = None, salto_valor: bool = False) -> str | None:
     while True:
@@ -53,7 +55,7 @@ def validar_email(m_entrada: str, m_salida: str | None = None, salto_valor: bool
                 return None
             if not valor:
                 raise DatoInvalidoError("No se permite un valor vacío.")
-            if not PATRON_EMAIL.fullmatch(valor):
+            if not es_email_valido(valor):
                 raise DatoInvalidoError("Debe ingresar un email válido.")
             if m_salida is not None:
                 print(m_salida)

@@ -3,6 +3,7 @@ from time import sleep
 
 from servicios.usuario_servicio import UsuarioServicio
 from servicios.categoria_servicio import CategoriaServicio
+from servicios.pedido_servicio import PedidoServicio
 from servicios.producto_servicio import ProductoServicio
 from entidades.usuario import Usuario
 from enums.rol import Rol
@@ -13,11 +14,11 @@ from consola.menu_cliente import MenuCliente
 from consola.presentacion import limpiar_consola, mostrar_encabezado, mostrar_error, mostrar_exito, mostrar_info, mostrar_sistema
 from consola.validadores import validar_texto
 
-def crear_menu(usuario: Usuario, categoria_servicio: CategoriaServicio, producto_servicio: ProductoServicio) -> Menu:
+def crear_menu(usuario: Usuario, usuario_servicio: UsuarioServicio, categoria_servicio: CategoriaServicio, producto_servicio: ProductoServicio, pedido_servicio: PedidoServicio) -> Menu:
     if usuario.rol == Rol.ADMIN:
-        return MenuAdministrador(usuario, categoria_servicio, producto_servicio)
+        return MenuAdministrador(usuario, categoria_servicio, producto_servicio, usuario_servicio, pedido_servicio)
     elif usuario.rol == Rol.USUARIO:
-        return MenuCliente(usuario, producto_servicio)
+        return MenuCliente(usuario, producto_servicio, pedido_servicio)
     else:
         raise ValueError("Rol de usuario no soportado.")
 
@@ -48,6 +49,7 @@ def main() -> None:
     usuario_servicio = UsuarioServicio()
     categoria_servicio = CategoriaServicio()
     producto_servicio = ProductoServicio(categoria_servicio)
+    pedido_servicio = PedidoServicio(usuario_servicio, producto_servicio)
     usuario_admin = Usuario("Ana", "Pérez", "admin@foodstore.com", "+5491234567890", "admin123", Rol.ADMIN)
     usuario_servicio.agregar(usuario_admin)
 
@@ -55,7 +57,7 @@ def main() -> None:
         usuario = login(usuario_servicio)
         if usuario is None:
             break
-        menu = crear_menu(usuario, categoria_servicio, producto_servicio)
+        menu = crear_menu(usuario, usuario_servicio, categoria_servicio, producto_servicio, pedido_servicio)
         if not menu.mostrar():
             break
     print()
@@ -63,3 +65,6 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+
+# Hacer prueba completa
+# Hacer cambio de metodo para titulos en clase Menu, moviendolo a consola.presentacion
