@@ -1,3 +1,5 @@
+from collections.abc import Callable
+
 from entidades.usuario import Usuario
 from enums.estado import Estado
 from enums.forma_pago import FormaPago
@@ -19,7 +21,7 @@ from servicios.usuario_servicio import UsuarioServicio
 def verificar(descripcion: str, condicion: bool) -> None:
     print(f"{'OK    ' if condicion else 'FALLA '} {descripcion}")
 
-def verificar_error(descripcion: str, excepcion: type[Exception], funcion: callable) -> None:
+def verificar_error(descripcion: str, excepcion: type[Exception], funcion: Callable[[], object]) -> None:
     try:
         funcion()
         verificar(descripcion, False)

@@ -1,3 +1,4 @@
+from collections.abc import Sequence
 from enum import Enum
 from getpass import getpass
 
@@ -53,7 +54,7 @@ class MenuAdministrador(Menu):
                     mostrar_error("Opción inexistente, intente nuevamente.")
                     self._pausa()
 
-    def __sin_registros(self, registros: list, mensaje: str) -> bool:
+    def __sin_registros(self, registros: Sequence[object], mensaje: str) -> bool:
         if registros:
             return False
         mostrar_info(mensaje)

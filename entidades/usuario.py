@@ -3,7 +3,7 @@ from enums.rol import Rol
 from excepciones.food_store_error import *
 
 class Usuario(Base):
-    def __init__(self, nombre: str, apellido: str, mail: str, celular: str, contrasenia: str, rol: Rol):
+    def __init__(self, nombre: str, apellido: str, mail: str, celular: str, contrasenia: str, rol: Rol) -> None:
         super().__init__()
         self.nombre = nombre
         self.apellido = apellido

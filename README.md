@@ -11,6 +11,8 @@ Para ingresar por primera vez al sistema como administrador, utilice las siguien
 - **Email:** `admin@foodstore.com`
 - **Contraseña:** `admin123`
 
+Los demás usuarios (administradores y clientes) se crean desde el menú **Usuarios** del administrador. Los IDs se asignan automáticamente desde `0`, en orden de creación, con un contador compartido por todas las entidades.
+
 ## Instrucciones de uso
 
 ### Requisitos previos
@@ -50,43 +52,99 @@ python pruebas.py
 
 ## Ejemplos de entradas/salidas
 
-### Ejemplo 1: Inicio de sesión exitoso como Administrador
+Los ejemplos asumen que existen los datos necesarios (productos, usuarios y pedidos) cargados previamente.
+
+### Ejemplo 1: Inicio de sesión exitoso como administrador
 
 - **Entrada:**
-  - Mail: `admin@foodstore.com`
+  - Email: `admin@foodstore.com`
   - Contraseña: `admin123`
-- **Salida:** `"Bienvenido/a, Ana Pérez [ADMIN]"` seguido del menú completo de gestión (Categorías, Productos, Usuarios, Pedidos).
+- **Salida:**
 
-### Ejemplo 2: Intento fallido de autenticación
+```text
+Bienvenido/a Ana Pérez (Administrador).
+```
+
+Luego se muestra el menú principal: Categorías, Productos, Usuarios, Pedidos, Cerrar sesión y Salir.
+
+### Ejemplo 2: Credenciales incorrectas
 
 - **Entrada:**
-  - Mail: `admin@foodstore.com`
+  - Email: `admin@foodstore.com`
   - Contraseña: `clave_incorrecta`
-- **Salida:** `"Mail o contraseña incorrectos"` (Tras 3 intentos fallidos, el programa informa el bloqueo de sesión y finaliza la ejecución).
+- **Salida:**
 
-### Ejemplo 3: Creación de un pedido sin stock suficiente
+```text
+Mail o contraseña incorrectos.
+```
 
-- **Entrada:** Selección de un producto con stock insuficiente al armar el detalle de un pedido.
-- **Salida:** `"Error: StockInsuficienteError - La cantidad solicitada supera el stock disponible del producto."` (El pedido se cancela sin modificar los datos guardados).
+Tras 3 intentos fallidos se muestra `Ha agotado todos los intentos para iniciar sesión.` y el programa finaliza.
 
-### Ejemplo 4: Intento de eliminación de una categoría con productos activos
+### Ejemplo 3: Alta de usuario con mail repetido
 
-- **Entrada:** Selección de la opción para eliminar una categoría asociada a productos no eliminados.
-- **Salida:** `"Error: OperacionNoPermitidaError - No se puede eliminar la categoría porque contiene productos activos asociados."`
+- **Entrada** (Usuarios > Crear): Mail `admin@foodstore.com`
+- **Salida:**
+
+```text
+Ya existe un usuario con ese mail.
+```
+
+El sistema vuelve a pedir el mail hasta que ingrese uno libre.
+
+### Ejemplo 4: Pedido con stock insuficiente
+
+- **Entrada** (Pedidos > Crear): ID de usuario `1`, forma de pago `1` (Tarjeta), ID de producto `2` (Jugo, con stock 5), cantidad `10`.
+- **Salida:**
+
+```text
+Stock insuficiente de Jugo. Disponible: 5.
+```
+
+El pedido no se guarda y el stock no se modifica.
+
+### Ejemplo 5: Cliente consulta el detalle de un pedido propio
+
+- **Entrada:** inicio de sesión como cliente, opción Mis pedidos, ID de pedido `1`.
+- **Salida:** una tabla con el detalle, por ejemplo:
+
+```text
+       Detalle del pedido 1
+┏━━━━━━━━━━┳━━━━━━━━━━┳━━━━━━━━━━┓
+┃ Producto ┃ Cantidad ┃ Subtotal ┃
+┡━━━━━━━━━━╇━━━━━━━━━━╇━━━━━━━━━━┩
+│ Jugo     │ 2        │ 1600.0   │
+└──────────┴──────────┴──────────┘
+Total: $1600.0
+```
+
+### Ejemplo 6: Cliente intenta ver un pedido de otro usuario
+
+- **Entrada:** inicio de sesión como cliente, opción Mis pedidos, ID de un pedido ajeno `3`.
+- **Salida:**
+
+```text
+Pedido con ID 3 no encontrado.
+```
 
 ## Participación de los integrantes
 
 ### Juan Santiago Arango ([@jsacode-dev](https://github.com/jsacode-dev))
 
-- Tarea 1
-- Tarea 2
-- Tarea 3
-
+- Épica 0 (Acceso al sistema): Entidad Usuario, servicio de autenticación y sistema de menús polimórficos.
+- Ëpica 2 (Gestión de productos): Entidad Producto, servicio de productos y su submenú con filtros
+- Épica 3 (Gestión de usuarios): Gestión de usuarios en consola (ABM admin y "Ver mis datos" cliente).
+- Épica 4 (Gestión de pedidos y detalles): Entidades Pedido y DetallePedido, lógica de stock/estados y menús de pedidos.
+- Script de pruebas (pruebas.py).
+- Edición del video de demostración.
+- Repositorio de GitHub y README.MD.
 ### Romina Correa ([@Romi171](https://github.com/Romi171))
 
-- Tarea 1
-- Tarea 2
-- Tarea 3
+- Estructura de paquetes (entidades, servicios, consola, enums, excepciones) y main.py / pruebas.py.
+- Jerarquía de excepciones propias (FoodStoreError y subclases).
+- Enumerados (Rol, Estado, FormaPago).
+- Clase abstracta Base e interfaz Calculable.
+- Épica 1 (Gestión de categorías): Entidad Categoria, servicio de categorías y su submenú de consola.
+- Informe técnico en PDF.
 
 ## Links útiles
 
