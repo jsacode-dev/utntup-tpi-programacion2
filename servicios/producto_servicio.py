@@ -8,14 +8,11 @@ class ProductoServicio:
         self.__categoria_servicio = categoria_servicio
         self.__productos: list[Producto] = []
 
-    def listar(self) -> list[Producto]:
-        return [p for p in self.__productos if not p.eliminado]
+    def listar(self, categoria: Categoria | None = None) -> list[Producto]:
+        return [p for p in self.__productos if not p.eliminado and (categoria is None or p.categoria == categoria)]
 
-    def listar_disponibles(self) -> list[Producto]:
-        return [p for p in self.listar() if p.disponible and p.stock > 0]
-
-    def filtrar_por_categoria(self, categoria: Categoria) -> list[Producto]: # Opcional. No se si dejarlo de forma definitiva o no.
-        return [p for p in self.listar() if p.categoria == categoria]
+    def listar_disponibles(self, categoria: Categoria | None = None) -> list[Producto]:
+        return [p for p in self.listar(categoria) if p.disponible and p.stock > 0]
 
     def buscar_por_id(self, id_producto: int) -> Producto:
         for p in self.__productos:

@@ -44,8 +44,7 @@ class MenuAdministrador(Menu):
                 case 4:
                     self.__menu_pedidos()
                 case 1:
-                    mostrar_info("Módulo en desarrollo.")
-                    self._pausa()
+                    self.__menu_categorias()
                 case 9:
                     return True
                 case 0:
@@ -60,6 +59,86 @@ class MenuAdministrador(Menu):
         mostrar_info(mensaje)
         self._pausa()
         return True
+
+    def __menu_categorias(self) -> None:
+        while True:
+            self._nueva_pantalla()
+            mostrar_menu("Categorías", [(1, "Listar"), (2, "Crear"), (3, "Editar"), (4, "Eliminar"), (0, "Volver")])
+            opcion = validar_numero("Seleccione una opción: ", minimo = 0, maximo = 4)
+
+            match opcion:
+                case 1:
+                    self.__listar_categorias()
+                case 2:
+                    mostrar_titulo("Crear categoría")
+                    self.__crear_categoria()
+                    self._pausa()
+                case 3:
+                    if self.__sin_registros(self.__categoria_servicio.listar(), "No hay categorías para editar."):
+                        continue
+                    mostrar_titulo("Editar categoría")
+                    self.__editar_categoria()
+                    self._pausa()
+                case 4:
+                    if self.__sin_registros(self.__categoria_servicio.listar(), "No hay categorías para eliminar."):
+                        continue
+                    mostrar_titulo("Eliminar categoría")
+                    self.__eliminar_categoria()
+                    self._pausa()
+                case 0:
+                    return
+
+    def __mostrar_categorias(self) -> None:
+        mostrar_tabla("Categorías", ["ID", "Nombre", "Descripción"], [
+            [c.id, c.nombre, c.descripcion] for c in self.__categoria_servicio.listar()
+        ])
+
+    def __listar_categorias(self) -> None:
+        self._nueva_pantalla()
+        if not self.__categoria_servicio.listar():
+            mostrar_info("No hay categorías cargadas")
+            self._pausa()
+            return
+        self.__mostrar_categorias()
+        self._esperar_volver()
+
+    def __crear_categoria(self) -> None:
+        try:
+            nombre = validar_texto("Nombre: ")
+            descripcion = validar_texto("Descripción: ")
+            categoria = self.__categoria_servicio.crear(nombre, descripcion)
+            mostrar_exito(f"Categoría con ID {categoria.id} creada.")
+        except FoodStoreError as e:
+            mostrar_error(str(e))
+
+    def __editar_categoria(self) -> None:
+        try:
+            self.__mostrar_categorias()
+            id_categoria = validar_numero("ID de la categoría a editar: ")
+            actual = self.__categoria_servicio.buscar_por_id(id_categoria)
+            nombre = validar_texto(f"Nombre [{actual.nombre}]: ", salto_valor = True)
+            descripcion = validar_texto(f"Descripción [{actual.descripcion}]: ", salto_valor = True)
+            self.__categoria_servicio.editar(
+                id_categoria,
+                nombre if nombre is not None else actual.nombre,
+                descripcion if descripcion is not None else actual.descripcion,
+            )
+            mostrar_exito(f"Categoría con ID {id_categoria} actualizada.")
+        except FoodStoreError as e:
+            mostrar_error(str(e))
+
+    def __eliminar_categoria(self) -> None:
+        try:
+            self.__mostrar_categorias()
+            id_categoria = validar_numero("ID de la categoría a eliminar: ")
+            self.__categoria_servicio.buscar_por_id(id_categoria)
+            if validar_texto("Confirma eliminación? (S/N): ").upper() != "S":
+                mostrar_info("Operación cancelada.")
+                return
+            self.__categoria_servicio.eliminar(id_categoria)
+            mostrar_exito("Categoría eliminada.")
+        except FoodStoreError as e:
+            mostrar_error(str(e))
 
     def __menu_productos(self) -> None:
         while True:
@@ -91,7 +170,8 @@ class MenuAdministrador(Menu):
 
     def __listar_productos(self) -> None:
         self._nueva_pantalla()
-        productos = self.__producto_servicio.listar()
+        categoria = self._elegir_categoria(self.__categoria_servicio)
+        productos = self.__producto_servicio.listar(categoria)
         if not productos:
             mostrar_info("No hay productos registrados.")
             self._pausa()
@@ -285,7 +365,8 @@ class MenuAdministrador(Menu):
 
     def __listar_pedidos(self) -> None:
         self._nueva_pantalla()
-        pedidos = self.__pedido_servicio.listar()
+        usuario = self.__elegir_usuario()
+        pedidos = self.__pedido_servicio.listar(usuario)
         if not pedidos:
             mostrar_info("No hay pedidos registrados.")
             self._pausa()
@@ -293,7 +374,29 @@ class MenuAdministrador(Menu):
         mostrar_tabla("Pedidos", ["ID", "Usuario", "Estado", "Forma de pago", "Total", "Fecha"], [
             [p.id, f"{p.usuario.nombre} {p.usuario.apellido}", p.estado.value, p.forma_pago.value, p.total, p.fecha] for p in pedidos
         ])
+        id_pedido = validar_numero("ID del pedido para ver el detalle (Enter para volver): ", salto_valor = True)
+        if id_pedido is not None:
+            try:
+                pedido = self.__pedido_servicio.buscar_por_id(int(id_pedido))
+                mostrar_tabla(f"Detalle del pedido {pedido.id}", ["Producto", "Cantidad", "Subtotal"], [
+                    [d.producto.nombre, d.cantidad, d.subtotal] for d in pedido.detalles
+                ])
+                mostrar_info(f"Total: ${pedido.total}")
+            except FoodStoreError as e:
+                mostrar_error(str(e))
         self._esperar_volver()
+
+    def __elegir_usuario(self) -> Usuario | None:
+        if (validar_texto("¿Filtrar por usuario? (S/N): ") or "").upper() != "S":
+            return None
+        mostrar_tabla("Usuarios", ["ID", "Nombre", "Apellido", "Mail"], [
+            [u.id, u.nombre, u.apellido, u.mail] for u in self.__usuario_servicio.listar()
+        ])
+        while True:
+            try:
+                return self.__usuario_servicio.buscar_por_id(int(validar_numero("ID del usuario: ")))
+            except FoodStoreError as e:
+                mostrar_error(str(e))
 
     def __crear_pedido(self) -> None:
         disponibles = self.__producto_servicio.listar_disponibles()

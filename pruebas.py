@@ -46,7 +46,32 @@ def epica_0() -> None:
 
 # Épica 1 - Gestión de categorías
 def epica_1() -> None:
-    pass
+    verificar("listar incluye la categoría creada en los datos compartidos", categoria in categoria_servicio.listar())
+    verificar_error("nombre repetido sin distinguir mayúsculas lanza DuplicadoError", DuplicadoError,
+                    lambda: categoria_servicio.crear("bebidas", "Otra descripción"))
+    verificar_error("nombre vacío lanza DatoInvalidoError", DatoInvalidoError,
+                    lambda: categoria_servicio.crear("  ", "Sin nombre"))
+    verificar_error("descripción vacía lanza DatoInvalidoError", DatoInvalidoError,
+                    lambda: categoria_servicio.crear("Postres", " "))
+
+    postres = categoria_servicio.crear("Postres", "Dulces")
+    verificar("crear asigna id y la agrega a listar", postres.id >= 0 and postres in categoria_servicio.listar())
+
+    verificar_error("editar con nombre de otra categoría lanza DuplicadoError", DuplicadoError,
+                    lambda: categoria_servicio.editar(postres.id, "bebidas", "Dulces"))
+    editada = categoria_servicio.editar(postres.id, "Postres", "Dulces y tortas")
+    verificar("editar actualiza la descripción", editada.descripcion == "Dulces y tortas")
+    verificar_error("editar una categoría inexistente lanza EntidadNoEncontradaError", EntidadNoEncontradaError,
+                    lambda: categoria_servicio.editar(9999, "Inexistente", "Sin datos"))
+
+    flan = producto_servicio.crear("Flan", "Casero", 1200.0, 3, "flan.jpg", True, postres.id)
+    verificar_error("eliminar categoría con productos activos lanza OperacionNoPermitidaError", OperacionNoPermitidaError,
+                    lambda: categoria_servicio.eliminar(postres.id))
+    producto_servicio.eliminar(flan.id)
+    categoria_servicio.eliminar(postres.id)
+    verificar("eliminar oculta la categoría de listar", postres not in categoria_servicio.listar())
+    verificar_error("buscar_por_id de una categoría eliminada lanza EntidadNoEncontradaError", EntidadNoEncontradaError,
+                    lambda: categoria_servicio.buscar_por_id(postres.id))
 
 # Épica 2 - Gestión de productos
 def epica_2() -> None:
@@ -164,8 +189,40 @@ def epica_4() -> None:
                     lambda: pedido_servicio.buscar_de_usuario(p2.id, otro))
     verificar("buscar_de_usuario con pedido propio lo devuelve", pedido_servicio.buscar_de_usuario(p2.id, marta) is p2)
 
+# Filtros opcionales (listar por categoría y por usuario)
+def filtros_opcionales() -> None:
+    snacks = categoria_servicio.crear("Snacks", "Para picar")
+    vacia = categoria_servicio.crear("Vacía", "Sin productos")
+    papas = producto_servicio.crear("Papas", "Fritas", 1000.0, 4, "papas.jpg", True, snacks.id)
+    papas_sin_stock = producto_servicio.crear("Nachos", "Con queso", 1100.0, 0, "nachos.jpg", True, snacks.id)
+    papas_no_disp = producto_servicio.crear("Maní", "Salado", 600.0, 3, "mani.jpg", False, snacks.id)
+    papas_borrada = producto_servicio.crear("Chizitos", "Bolsa", 500.0, 2, "chizitos.jpg", True, snacks.id)
+    producto_servicio.eliminar(papas_borrada.id)
+
+    verificar("listar(categoria) incluye solo productos de esa categoría", papas in producto_servicio.listar(snacks) and all(p.categoria == snacks for p in producto_servicio.listar(snacks)))
+    verificar("listar(categoria) no incluye productos de otra categoría", not any(p.categoria == categoria for p in producto_servicio.listar(snacks)))
+    verificar("listar(categoria) excluye productos eliminados", papas_borrada not in producto_servicio.listar(snacks))
+    verificar("listar(categoria sin productos) devuelve lista vacía", producto_servicio.listar(vacia) == [])
+    verificar("listar() sin filtro devuelve los mismos que listar(None)", producto_servicio.listar() == producto_servicio.listar(None))
+    verificar("listar_disponibles(categoria) incluye productos disponibles con stock", papas in producto_servicio.listar_disponibles(snacks))
+    verificar("listar_disponibles(categoria) excluye productos sin stock", papas_sin_stock not in producto_servicio.listar_disponibles(snacks))
+    verificar("listar_disponibles(categoria) excluye productos no disponibles", papas_no_disp not in producto_servicio.listar_disponibles(snacks))
+    verificar("listar_disponibles(None) incluye productos de todas las categorías", papas in producto_servicio.listar_disponibles(None) and producto_servicio.listar_disponibles() == producto_servicio.listar_disponibles(None))
+
+    cliente_filtro = usuario_servicio.crear("Filtro", "Uno", "filtro1@mail.com", "1133330000", "filtro123", Rol.USUARIO)
+    cliente_sin_pedidos = usuario_servicio.crear("Filtro", "Dos", "filtro2@mail.com", "1144440000", "filtro123", Rol.USUARIO)
+    pedido_visible = pedido_servicio.crear(cliente_filtro.id, FormaPago.EFECTIVO, [(papas.id, 1)])
+    pedido_eliminado = pedido_servicio.crear(cliente_filtro.id, FormaPago.EFECTIVO, [(papas.id, 1)])
+    pedido_servicio.eliminar(pedido_eliminado.id)
+
+    verificar("listar(usuario) incluye solo pedidos de ese usuario", pedido_visible in pedido_servicio.listar(cliente_filtro) and all(p.usuario == cliente_filtro for p in pedido_servicio.listar(cliente_filtro)))
+    verificar("listar(usuario) excluye pedidos eliminados", pedido_eliminado not in pedido_servicio.listar(cliente_filtro))
+    verificar("listar(usuario sin pedidos) devuelve lista vacía", pedido_servicio.listar(cliente_sin_pedidos) == [])
+    verificar("pedidos listar() sin filtro devuelve los mismos que listar(None)", pedido_servicio.listar() == pedido_servicio.listar(None))
+
 epica_0()
 epica_1()
 epica_2()
 epica_3()
 epica_4()
+filtros_opcionales()

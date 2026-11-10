@@ -3,12 +3,14 @@ from consola.presentacion import mostrar_error, mostrar_info, mostrar_menu, most
 from consola.validadores import validar_numero
 from entidades.usuario import Usuario
 from excepciones.food_store_error import FoodStoreError
+from servicios.categoria_servicio import CategoriaServicio
 from servicios.pedido_servicio import PedidoServicio
 from servicios.producto_servicio import ProductoServicio
 
 class MenuCliente(Menu):
-    def __init__(self, usuario: Usuario, producto_servicio: ProductoServicio, pedido_servicio: PedidoServicio) -> None:
+    def __init__(self, usuario: Usuario, categoria_servicio: CategoriaServicio, producto_servicio: ProductoServicio, pedido_servicio: PedidoServicio) -> None:
         super().__init__(usuario)
+        self.__categoria_servicio = categoria_servicio
         self.__producto_servicio = producto_servicio
         self.__pedido_servicio = pedido_servicio
 
@@ -33,8 +35,7 @@ class MenuCliente(Menu):
                 case 3:
                     self.__mis_pedidos()
                 case 1:
-                    mostrar_info("Módulo en desarrollo.")
-                    self._pausa()
+                    self.__ver_categorias()
                 case 9:
                     return True
                 case 0:
@@ -43,9 +44,22 @@ class MenuCliente(Menu):
                     mostrar_error("Opción inexistente, intente nuevamente.")
                     self._pausa()
 
+    def __ver_categorias(self) -> None:
+        self._nueva_pantalla()
+        categorias = self.__categoria_servicio.listar()
+        if not categorias:
+            mostrar_info("No hay categorías cargadas")
+            self._pausa()
+            return
+        mostrar_tabla("Categorías", ["ID", "Nombre", "Descripción"], [
+            [c.id, c.nombre, c.descripcion] for c in categorias
+        ])
+        self._esperar_volver()
+
     def __productos_disponibles(self) -> None:
         self._nueva_pantalla()
-        productos = self.__producto_servicio.listar_disponibles()
+        categoria = self._elegir_categoria(self.__categoria_servicio)
+        productos = self.__producto_servicio.listar_disponibles(categoria)
         if not productos:
             mostrar_info("No hay productos disponibles para mostrar.")
             self._pausa()

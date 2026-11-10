@@ -12,8 +12,8 @@ class PedidoServicio:
         self.__producto_servicio = producto_servicio
         self.__pedidos: list[Pedido] = []
 
-    def listar(self) -> list[Pedido]:
-        return [p for p in self.__pedidos if not p.eliminado]
+    def listar(self, usuario: Usuario | None = None) -> list[Pedido]:
+        return [p for p in self.__pedidos if not p.eliminado and (usuario is None or p.usuario == usuario)]
 
     def listar_de_usuario(self, usuario: Usuario) -> list[Pedido]:
         return [p for p in self.listar() if p.usuario == usuario]

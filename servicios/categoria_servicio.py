@@ -16,7 +16,7 @@ class CategoriaServicio:
         for categoria in self.__categorias:
             if categoria.id == id_categoria and not categoria.eliminado:
                 return categoria
-        raise EntidadNoEncontradaError(f"No existe una categoría con id {id_categoria}")
+        raise EntidadNoEncontradaError(f"No existe una categoría con ID {id_categoria}")
 
     def crear(self, nombre: str, descripcion: str) -> Categoria: 
         self.__validar_nombre_unico(nombre)
@@ -40,7 +40,7 @@ class CategoriaServicio:
             )
         categoria.eliminado = True
 
-    def __validar_nombre_unico(self, nombre: str, id_excluido: int = 0) -> None: #El id excluido es para cuando se edita una categoría, para que no se compare con ella misma
+    def __validar_nombre_unico(self, nombre: str, id_excluido: int | None = None) -> None: #El id excluido es para cuando se edita una categoría, para que no se compare con ella misma
         for categoria in self.listar():
             if categoria.nombre.lower() == nombre.strip().lower() and categoria.id != id_excluido:
                 raise DuplicadoError(f"Ya existe una categoría llamada {categoria.nombre}") 
