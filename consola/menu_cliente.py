@@ -8,6 +8,8 @@ from servicios.pedido_servicio import PedidoServicio
 from servicios.producto_servicio import ProductoServicio
 
 class MenuCliente(Menu):
+    """Menú de cliente con acceso a categorías, productos disponibles y pedidos propios."""
+
     def __init__(self, usuario: Usuario, categoria_servicio: CategoriaServicio, producto_servicio: ProductoServicio, pedido_servicio: PedidoServicio) -> None:
         super().__init__(usuario)
         self.__categoria_servicio = categoria_servicio
@@ -15,6 +17,7 @@ class MenuCliente(Menu):
         self.__pedido_servicio = pedido_servicio
 
     def mostrar(self) -> bool:
+        """Muestra el menú principal del cliente y gestiona la navegación."""
         while True:
             self._nueva_pantalla()
             mostrar_menu("Menú principal", [
@@ -45,6 +48,7 @@ class MenuCliente(Menu):
                     self._pausa()
 
     def __ver_categorias(self) -> None:
+        """Muestra la lista de categorías disponibles."""
         self._nueva_pantalla()
         categorias = self.__categoria_servicio.listar()
         if not categorias:
@@ -57,6 +61,7 @@ class MenuCliente(Menu):
         self._esperar_volver()
 
     def __productos_disponibles(self) -> None:
+        """Muestra los productos disponibles de una categoría seleccionada."""
         self._nueva_pantalla()
         categoria = self._elegir_categoria(self.__categoria_servicio)
         productos = self.__producto_servicio.listar_disponibles(categoria)
@@ -70,6 +75,7 @@ class MenuCliente(Menu):
         self._esperar_volver()
 
     def __mis_datos(self) -> None:
+        """Muestra los datos del usuario actual."""
         self._nueva_pantalla()
         mostrar_tabla("Mis datos", ["Nombre", "Apellido", "Mail", "Celular", "Rol"], [
             [self._usuario.nombre, self._usuario.apellido, self._usuario.mail, self._usuario.celular, self._usuario.rol.value]
@@ -77,6 +83,7 @@ class MenuCliente(Menu):
         self._esperar_volver()
 
     def __mis_pedidos(self) -> None:
+        """Muestra los pedidos del usuario actual y permite ver el detalle de cada uno."""
         self._nueva_pantalla()
         pedidos = self.__pedido_servicio.listar_de_usuario(self._usuario)
         if not pedidos:

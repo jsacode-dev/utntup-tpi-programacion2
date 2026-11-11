@@ -19,16 +19,18 @@ from servicios.producto_servicio import ProductoServicio
 from servicios.usuario_servicio import UsuarioServicio
 
 def verificar(descripcion: str, condicion: bool) -> None:
+    """Imprime el resultado de una verificación de prueba."""
     print(f"{'OK    ' if condicion else 'FALLA '} {descripcion}")
 
 def verificar_error(descripcion: str, excepcion: type[Exception], funcion: Callable[[], object]) -> None:
+    """Verifica que la ejecución de una función lance la excepción esperada."""
     try:
         funcion()
         verificar(descripcion, False)
     except excepcion:
         verificar(descripcion, True)
 
-# Datos compartidos por todas las épicas
+"""Datos compartidos por todas las épicas."""
 categoria_servicio = CategoriaServicio()
 producto_servicio = ProductoServicio(categoria_servicio)
 categoria = categoria_servicio.crear("Bebidas", "Sin alcohol")
@@ -36,16 +38,16 @@ usuario_servicio = UsuarioServicio()
 admin = usuario_servicio.crear("Ana", "Pérez", "ana@mail.com", "1155550000", "admin123", Rol.ADMIN)
 pedido_servicio = PedidoServicio(usuario_servicio, producto_servicio)
 
-# Épica 0 - Acceso al sistema
 def epica_0() -> None:
+    """Pruebas relacionadas con el acceso al sistema."""
     verificar("autenticar con mail y contraseña correctos devuelve el usuario", usuario_servicio.autenticar("ana@mail.com", "admin123") is admin)
     verificar_error("contraseña incorrecta lanza CredencialesInvalidasError", CredencialesInvalidasError,
                     lambda: usuario_servicio.autenticar("ana@mail.com", "clave-mal"))
     verificar_error("mail inexistente lanza CredencialesInvalidasError", CredencialesInvalidasError,
                     lambda: usuario_servicio.autenticar("nadie@mail.com", "admin123"))
 
-# Épica 1 - Gestión de categorías
 def epica_1() -> None:
+    """Pruebas relacionadas con la gestión de categorías."""
     verificar("listar incluye la categoría creada en los datos compartidos", categoria in categoria_servicio.listar())
     verificar_error("nombre repetido sin distinguir mayúsculas lanza DuplicadoError", DuplicadoError,
                     lambda: categoria_servicio.crear("bebidas", "Otra descripción"))
@@ -73,8 +75,8 @@ def epica_1() -> None:
     verificar_error("buscar_por_id de una categoría eliminada lanza EntidadNoEncontradaError", EntidadNoEncontradaError,
                     lambda: categoria_servicio.buscar_por_id(postres.id))
 
-# Épica 2 - Gestión de productos
 def epica_2() -> None:
+    """Pruebas relacionadas con la gestión de productos."""
     producto = producto_servicio.crear("Agua", "Sin gas 500 ml", 1500.0, 10, "agua.jpg", True, categoria.id)
     verificar("crear asigna id y lo agrega a la categoría", producto.id >= 0 and producto in categoria.productos)
     verificar("listar_disponibles incluye producto disponible con stock", producto in producto_servicio.listar_disponibles())
@@ -99,8 +101,8 @@ def epica_2() -> None:
     verificar_error("buscar_por_id de un producto eliminado lanza EntidadNoEncontradaError", EntidadNoEncontradaError,
                     lambda: producto_servicio.buscar_por_id(producto.id))
 
-# Épica 3 - Gestión de usuarios
 def epica_3() -> None:
+    """Pruebas relacionadas con la gestión de usuarios."""
     cliente = usuario_servicio.crear("Luis", "Gómez", "luis@mail.com", "1166660000", "cliente123", Rol.USUARIO)
     verificar("crear agrega el usuario a listar", cliente in usuario_servicio.listar())
     verificar_error("mail sin @ lanza DatoInvalidoError", DatoInvalidoError,
@@ -124,8 +126,8 @@ def epica_3() -> None:
     verificar_error("buscar_por_id de un usuario eliminado lanza EntidadNoEncontradaError", EntidadNoEncontradaError,
                     lambda: usuario_servicio.buscar_por_id(cliente.id))
 
-# Épica 4 - Gestión de pedidos y detalles
 def epica_4() -> None:
+    """Pruebas relacionadas con la gestión de pedidos y detalles."""
     marta = usuario_servicio.crear("Marta", "Díaz", "marta@mail.com", "1199990000", "marta123", Rol.USUARIO)
     otro = usuario_servicio.crear("Otro", "Cliente", "otro@mail.com", "1122223333", "otro123", Rol.USUARIO)
     jugo = producto_servicio.crear("Jugo", "Naranja", 800.0, 5, "jugo.jpg", True, categoria.id)
@@ -189,8 +191,8 @@ def epica_4() -> None:
                     lambda: pedido_servicio.buscar_de_usuario(p2.id, otro))
     verificar("buscar_de_usuario con pedido propio lo devuelve", pedido_servicio.buscar_de_usuario(p2.id, marta) is p2)
 
-# Filtros opcionales (listar por categoría y por usuario)
 def filtros_opcionales() -> None:
+    """Pruebas relacionadas con los filtros opcionales de productos (categoría y usuario)."""
     snacks = categoria_servicio.crear("Snacks", "Para picar")
     vacia = categoria_servicio.crear("Vacía", "Sin productos")
     papas = producto_servicio.crear("Papas", "Fritas", 1000.0, 4, "papas.jpg", True, snacks.id)
@@ -220,6 +222,7 @@ def filtros_opcionales() -> None:
     verificar("listar(usuario sin pedidos) devuelve lista vacía", pedido_servicio.listar(cliente_sin_pedidos) == [])
     verificar("pedidos listar() sin filtro devuelve los mismos que listar(None)", pedido_servicio.listar() == pedido_servicio.listar(None))
 
+"""Ejecución completa de la suite de pruebas."""
 epica_0()
 epica_1()
 epica_2()

@@ -16,6 +16,8 @@ from servicios.producto_servicio import ProductoServicio
 from servicios.usuario_servicio import UsuarioServicio
 
 class MenuAdministrador(Menu):
+    """Menú de administrador con acceso a categorías, productos, usuarios y pedidos."""
+
     def __init__(self, usuario: Usuario, categoria_servicio: CategoriaServicio, producto_servicio: ProductoServicio, usuario_servicio: UsuarioServicio, pedido_servicio: PedidoServicio) -> None:
         super().__init__(usuario)
         self.__categoria_servicio = categoria_servicio
@@ -24,6 +26,7 @@ class MenuAdministrador(Menu):
         self.__pedido_servicio = pedido_servicio
 
     def mostrar(self) -> bool:
+        """Muestra el menú principal del administrador."""
         while True:
             self._nueva_pantalla()
             mostrar_menu("Menú principal", [
@@ -54,6 +57,7 @@ class MenuAdministrador(Menu):
                     self._pausa()
 
     def __sin_registros(self, registros: Sequence[object], mensaje: str) -> bool:
+        """Verifica si no hay registros y muestra un mensaje informativo."""
         if registros:
             return False
         mostrar_info(mensaje)
@@ -61,6 +65,7 @@ class MenuAdministrador(Menu):
         return True
 
     def __menu_categorias(self) -> None:
+        """Muestra el menú de categorías y gestiona las acciones del administrador."""
         while True:
             self._nueva_pantalla()
             mostrar_menu("Categorías", [(1, "Listar"), (2, "Crear"), (3, "Editar"), (4, "Eliminar"), (0, "Volver")])
@@ -89,11 +94,13 @@ class MenuAdministrador(Menu):
                     return
 
     def __mostrar_categorias(self) -> None:
+        """Muestra todas las categorías en una tabla."""
         mostrar_tabla("Categorías", ["ID", "Nombre", "Descripción"], [
             [c.id, c.nombre, c.descripcion] for c in self.__categoria_servicio.listar()
         ])
 
     def __listar_categorias(self) -> None:
+        """Lista todas las categorías disponibles."""
         self._nueva_pantalla()
         if not self.__categoria_servicio.listar():
             mostrar_info("No hay categorías cargadas")
@@ -103,6 +110,7 @@ class MenuAdministrador(Menu):
         self._esperar_volver()
 
     def __crear_categoria(self) -> None:
+        """Crea una nueva categoría."""
         try:
             nombre = validar_texto("Nombre: ")
             descripcion = validar_texto("Descripción: ")
@@ -112,6 +120,7 @@ class MenuAdministrador(Menu):
             mostrar_error(str(e))
 
     def __editar_categoria(self) -> None:
+        """Edita una categoría existente."""
         try:
             self.__mostrar_categorias()
             id_categoria = validar_numero("ID de la categoría a editar: ")
@@ -128,6 +137,7 @@ class MenuAdministrador(Menu):
             mostrar_error(str(e))
 
     def __eliminar_categoria(self) -> None:
+        """Elimina una categoría existente."""
         try:
             self.__mostrar_categorias()
             id_categoria = validar_numero("ID de la categoría a eliminar: ")
@@ -141,6 +151,7 @@ class MenuAdministrador(Menu):
             mostrar_error(str(e))
 
     def __menu_productos(self) -> None:
+        """Muestra el menú de productos y gestiona las acciones del administrador."""
         while True:
             self._nueva_pantalla()
             mostrar_menu("Productos", [(1, "Listar"), (2, "Crear"), (3, "Editar"), (4, "Eliminar"), (0, "Volver")])
@@ -169,6 +180,7 @@ class MenuAdministrador(Menu):
                     return
 
     def __listar_productos(self) -> None:
+        """Lista todos los productos, opcionalmente filtrados por categoría."""
         self._nueva_pantalla()
         categoria = self._elegir_categoria(self.__categoria_servicio)
         productos = self.__producto_servicio.listar(categoria)
@@ -182,6 +194,7 @@ class MenuAdministrador(Menu):
         self._esperar_volver()
 
     def __menu_usuarios(self) -> None:
+        """Muestra el menú de usuarios y gestiona las acciones del administrador."""
         while True:
             self._nueva_pantalla()
             mostrar_menu("Usuarios", [(1, "Listar"), (2, "Crear"), (3, "Editar"), (4, "Eliminar"), (0, "Volver")])
@@ -210,6 +223,7 @@ class MenuAdministrador(Menu):
                     return
 
     def __listar_usuarios(self) -> None:
+        """Lista todos los usuarios registrados."""
         self._nueva_pantalla()
         usuarios = self.__usuario_servicio.listar()
         if not usuarios:
@@ -222,6 +236,7 @@ class MenuAdministrador(Menu):
         self._esperar_volver()
 
     def __pedir_enum(self, titulo: str, enumerado: type[Enum], actual: Enum | None = None) -> Enum | None:
+        """Solicita al usuario que elija un valor de un enumerado, opcionalmente mostrando el valor actual."""
         opciones_enum = list(enumerado)
         opciones = ", ".join(f"{i} = {op.value}" for i, op in enumerate(opciones_enum, 1))
         texto_actual = f" [{actual.value}]" if actual is not None else ""
@@ -229,6 +244,7 @@ class MenuAdministrador(Menu):
         return opciones_enum[int(numero) - 1] if numero is not None else None
 
     def __pedir_mail_nuevo(self) -> str:
+        """Solicita un mail nuevo que no esté registrado en el sistema."""
         while True:
             mail = validar_email("Mail: ")
             if self.__usuario_servicio.mail_disponible(mail):
@@ -236,6 +252,7 @@ class MenuAdministrador(Menu):
             mostrar_error("Ya existe un usuario con ese mail.")
 
     def __crear_usuario(self) -> None:
+        """Crea un nuevo usuario en el sistema."""
         try:
             nombre = validar_texto("Nombre: ")
             apellido = validar_texto("Apellido: ")
@@ -248,6 +265,7 @@ class MenuAdministrador(Menu):
             mostrar_error(str(e))
 
     def __editar_usuario(self) -> None:
+        """Edita un usuario existente."""
         try:
             id_usuario = validar_numero("ID del usuario a editar: ")
             actual = self.__usuario_servicio.buscar_por_id(id_usuario)
@@ -271,6 +289,7 @@ class MenuAdministrador(Menu):
             mostrar_error(str(e))
 
     def __eliminar_usuario(self) -> None:
+        """Elimina un usuario existente."""
         try:
             id_usuario = validar_numero("ID del usuario a eliminar: ")
             if validar_texto("Confirma eliminación? (S/N): ").upper() != "S":
@@ -282,6 +301,7 @@ class MenuAdministrador(Menu):
             mostrar_error(str(e))
 
     def __crear_producto(self) -> None:
+        """Crea un nuevo producto en el sistema."""
         categorias = self.__categoria_servicio.listar()
         if not categorias:
             mostrar_info("No hay categorías registradas. Cree una categoría antes de crear un producto.")
@@ -302,6 +322,7 @@ class MenuAdministrador(Menu):
             mostrar_error(str(e))
 
     def __editar_producto(self) -> None:
+        """Edita un producto existente."""
         try:
             id_producto = validar_numero("ID del producto a editar: ")
             actual = self.__producto_servicio.buscar_por_id(id_producto)
@@ -325,6 +346,7 @@ class MenuAdministrador(Menu):
             mostrar_error(str(e))
 
     def __eliminar_producto(self) -> None:
+        """Elimina un producto existente."""
         try:
             id_producto = validar_numero("ID del producto a eliminar: ")
             if validar_texto("Confirma eliminación? (S/N): ").upper() != "S":
@@ -336,6 +358,7 @@ class MenuAdministrador(Menu):
             mostrar_error(str(e))
 
     def __menu_pedidos(self) -> None:
+        """Muestra el menú de gestión de pedidos."""
         while True:
             self._nueva_pantalla()
             mostrar_menu("Pedidos", [(1, "Listar"), (2, "Crear"), (3, "Actualizar estado / forma de pago"), (4, "Eliminar"), (0, "Volver")])
@@ -364,6 +387,7 @@ class MenuAdministrador(Menu):
                     return
 
     def __listar_pedidos(self) -> None:
+        """Lista los pedidos de un usuario específico."""
         self._nueva_pantalla()
         usuario = self.__elegir_usuario()
         pedidos = self.__pedido_servicio.listar(usuario)
@@ -387,6 +411,7 @@ class MenuAdministrador(Menu):
         self._esperar_volver()
 
     def __elegir_usuario(self) -> Usuario | None:
+        """Permite seleccionar un usuario de la lista o filtrar por usuario."""
         if (validar_texto("¿Filtrar por usuario? (S/N): ") or "").upper() != "S":
             return None
         mostrar_tabla("Usuarios", ["ID", "Nombre", "Apellido", "Mail"], [
@@ -399,6 +424,7 @@ class MenuAdministrador(Menu):
                 mostrar_error(str(e))
 
     def __crear_pedido(self) -> None:
+        """Crea un nuevo pedido para un usuario seleccionado."""
         disponibles = self.__producto_servicio.listar_disponibles()
         if not disponibles:
             mostrar_info("No hay productos disponibles con stock para crear un pedido.")
@@ -425,6 +451,7 @@ class MenuAdministrador(Menu):
             mostrar_error(str(e))
 
     def __actualizar_pedido(self) -> None:
+        """Actualiza el estado y la forma de pago de un pedido existente."""
         try:
             id_pedido = validar_numero("ID del pedido a actualizar: ")
             actual = self.__pedido_servicio.buscar_por_id(id_pedido)
@@ -436,6 +463,7 @@ class MenuAdministrador(Menu):
             mostrar_error(str(e))
 
     def __eliminar_pedido(self) -> None:
+        """Elimina un pedido existente."""
         try:
             id_pedido = validar_numero("ID del pedido a eliminar: ")
             if validar_texto("Confirma eliminación? (S/N): ").upper() != "S":

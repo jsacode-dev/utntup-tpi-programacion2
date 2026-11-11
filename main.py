@@ -15,6 +15,7 @@ from consola.presentacion import limpiar_consola, mostrar_encabezado, mostrar_er
 from consola.validadores import validar_texto
 
 def crear_menu(usuario: Usuario, usuario_servicio: UsuarioServicio, categoria_servicio: CategoriaServicio, producto_servicio: ProductoServicio, pedido_servicio: PedidoServicio) -> Menu:
+    """Crea y retorna el menú correspondiente según el rol del usuario."""
     if usuario.rol == Rol.ADMIN:
         return MenuAdministrador(usuario, categoria_servicio, producto_servicio, usuario_servicio, pedido_servicio)
     elif usuario.rol == Rol.USUARIO:
@@ -23,6 +24,7 @@ def crear_menu(usuario: Usuario, usuario_servicio: UsuarioServicio, categoria_se
         raise ValueError("Rol de usuario no soportado.")
 
 def login(servicio: UsuarioServicio) -> Usuario | None:
+    """Realiza el proceso de inicio de sesión para un usuario."""
     intentos = 3
     while True:
         limpiar_consola()
@@ -46,6 +48,7 @@ def login(servicio: UsuarioServicio) -> Usuario | None:
                 return None
 
 def main() -> None:
+    """Función principal que inicializa los servicios y maneja el flujo de la aplicación."""
     usuario_servicio = UsuarioServicio()
     categoria_servicio = CategoriaServicio()
     producto_servicio = ProductoServicio(categoria_servicio)
