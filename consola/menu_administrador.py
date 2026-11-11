@@ -159,6 +159,8 @@ class MenuAdministrador(Menu):
 
             match opcion:
                 case 1:
+                    if self.__sin_registros(self.__producto_servicio.listar(), "No hay productos para listar."):
+                        continue
                     self.__listar_productos()
                 case 2:
                     mostrar_titulo("Crear producto")
