@@ -137,6 +137,7 @@ Pedido con ID 3 no encontrado.
 - Script de pruebas (pruebas.py).
 - Edición del video de demostración.
 - Repositorio de GitHub y README.MD.
+
 ### Romina Correa ([@Romi171](https://github.com/Romi171))
 
 - Estructura de paquetes (entidades, servicios, consola, enums, excepciones) y main.py / pruebas.py.
@@ -149,6 +150,4 @@ Pedido con ID 3 no encontrado.
 ## Links útiles
 
 - [Repositorio del proyecto en GitHub](https://github.com/jsacode-dev/utntup-tpi-programacion2)
-- [Link del video explicativo / demostración](https://drive.google.com/file/d/TU_ID_VIDEO_DEMO/view?usp=sharing)
-
-# HACER PÚBLICO EL REPOSITORIO
+- ~~Link del video explicativo / demostración~~ (Por el momento el video no está disponible)
